@@ -128,24 +128,24 @@ score = float(unsmile[0]["score"])  # 0.0 ~ 1.0
 ```
 
 - `label`: 6가지 라벨 중 1개 (enum)
-- `count`: 심각도 (1~5)
-- `items`: 최소 1개, 최대 5개 (한 메시지에 복수 라벨 가능)
+- `count`: 욕설라벨 중복 수 (1~5)
 
 ### 3. 중복 억제 시스템
 
-캡처 주기(예: 3초마다)로 인한 중복 탐지를 방지합니다:
+채팅 캡처 주기(예: 3초마다)로 인한 중복 탐지를 방지합니다:
+사용자가 선택 할 수 있게끔 되어있습니다. (예 3,5,10,30,60초)
 
 **설정값**
 ```python
 DEDUP_ENABLED = True              # 중복 억제 활성화
-DEDUP_TTL_SEC = 12.0             # 12초 내 중복 무시
+DEDUP_TTL_SEC = 10.0             # 10초 내 중복 무시
 DEDUP_SIM_THRESHOLD = 0.985      # 98.5% 이상 유사 시 중복 판정
 DEDUP_MAX_ENTRIES = 400          # 세션당 최대 캐시 크기
 ```
 
 **동작 방식**
 1. 텍스트 정규화: 소문자 변환 + 공백 정규화
-2. 시간 기반 캐시: 최근 12초 이내 탐지 기록 유지
+2. 시간 기반 캐시: 최근 10초 이내 탐지 기록 유지
 3. 유사도 검사: `difflib.SequenceMatcher`로 98.5% 이상 유사 시 억제
 4. 메모리 관리: 세션별 최대 400개까지만 캐싱
 
@@ -172,7 +172,7 @@ SPRING_CALLBACK_URL_2 = "http://127.0.0.1:8081/api/analysis/callback"
     "text": "너 같은 쓰레기는 방송 그만해",
     "score": "0.95",
     "classification": [
-      {"label": "BULLYING", "count": 4}
+      {"label": "BULLYING", "count": 1}
     ]
   }
 ]
@@ -346,7 +346,7 @@ def get_llm_chain() -> Optional[ChatPromptTemplate]:
   "user": "유저2",
   "text": "너 같은 쓰레기",
   "score": "0.95",
-  "classification": [{"label": "BULLYING", "count": 4}],
+  "classification": [{"label": "BULLYING", "count": 1}],
   "suppressed": false
 }
 ```
@@ -384,7 +384,7 @@ def get_llm_chain() -> Optional[ChatPromptTemplate]:
 
 ## 📊 모델 선택 이유
 
-### UNSMILE
+### UNSMILE 
 - **장점**: 한국어 특화, 빠른 추론 속도, 로컬 실행 가능
 - **역할**: 1차 필터로 API 비용 절감 및 응답 속도 개선
 
